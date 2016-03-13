@@ -19,14 +19,12 @@ foreach ($User in $Users)
         $prefix++
         $SAM = [char]$prefix + "$year" + $Firstname.Substring(0,2).ToLower() + $Lastname.Substring(0,2).ToLower()
         If(-Not (Get-ADUser -Filter 'SamAccountName -like $SAM')){
-            echo "NOT FOUND"
             break
         }
-        echo "FOUND"
     }
 
     $Email = $SAM + "@scripting.nsa.his.se"
-    $Password = ([char[]](Get-Random -Input $(33..126) -Count 12)) -join ""    $Seperator = " "
+    $Password = ([char[]](Get-Random -Input $(33..126) -Count 15)) -join ""    $Seperator = " "
     $Displayname = $User.Firstname + " " + $User.Lastname
     If(Get-ADUser -Filter 'Name -like $Displayname'){
         $Seperator = " " + $SAM.ToUpper().Substring(0,1) + "." + " " 
@@ -36,18 +34,14 @@ foreach ($User in $Users)
     $Department = $User.Department
     $City = $User.City
     $Role = $User.Role
+    
+    echo "UserName: $SAM`r`nPassword: $Password`r`n" | Out-File "C:\Users\Administrator\Documents\GitHub\powershell\$SAM.txt"
 
-    echo "--------------------------------------------"
-    echo "* Displayname : $DisplayName"
-    echo "* Name        : $Name"
-    echo "* Firstname   : $Firstname"
-    echo "* Lastname    : $Lastname"
-    echo "* SAM         : $SAM"
-    echo "* Email       : $Email"
-    echo "* Password    : $Password"
-    echo "* City        : $City"
-    echo "* Department  : $Department"
-    echo "* Title        : $Role"
-    echo "$SAM - $Password" | Out-File "C:\Users\Administrator\Documents\GitHub\powershell\$SAM.txt"
-    New-ADUser -Name $Name -DisplayName "$DisplayName" -SamAccountName $SAM -Email $Email -UserPrincipalName $Email -GivenName "$Firstname" -Surname "$Lastname" -Department $Department -Title $Role -City $City -AccountPassword (ConvertTo-SecureString $Password -AsPlainText -Force) -Enabled $true -ChangePasswordAtLogon $true
+    if(-Not (Get-ADOrganizationalUnit -SearchBase 'OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -Filter 'name -like $Department')){
+        New-ADOrganizationalUnit -Name $Department -Path 'OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se'
+        $ShadowGroup = 'SG_' + $Department
+        New-ADGroup -Name $ShadowGroup -Path 'OU=Roles,OU=Groups,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -GroupCategory Security -GroupScope Global
+    }
+
+    New-ADUser -Name $Name -DisplayName "$DisplayName" -SamAccountName $SAM -Email $Email -UserPrincipalName $Email -GivenName "$Firstname" -Surname "$Lastname" -Path "OU=$Department,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se" -Department $Department -Title $Role -City $City -AccountPassword (ConvertTo-SecureString $Password -AsPlainText -Force) -Enabled $true -ChangePasswordAtLogon $true
 }
