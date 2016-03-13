@@ -42,6 +42,14 @@ foreach ($User in $Users)
         $ShadowGroup = 'SG_' + $Department
         New-ADGroup -Name $ShadowGroup -Path 'OU=Roles,OU=Groups,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -GroupCategory Security -GroupScope Global
     }
+    If(-Not (Get-ADGroup -SearchBase 'OU=Roles,OU=Groups,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -Filter 'name -like $City')){
+        New-ADGroup -Name $City -Path 'OU=Roles,OU=Groups,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -GroupCategory Security -GroupScope Global
+    }
 
     New-ADUser -Name $Name -DisplayName "$DisplayName" -SamAccountName $SAM -Email $Email -UserPrincipalName $Email -GivenName "$Firstname" -Surname "$Lastname" -Path "OU=$Department,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se" -Department $Department -Title $Role -City $City -AccountPassword (ConvertTo-SecureString $Password -AsPlainText -Force) -Enabled $true -ChangePasswordAtLogon $true
+    $user = Get-ADUser "CN=$Name,OU=$Department,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se";
+    $group = Get-ADGroup "CN=$City,OU=Roles,OU=Groups,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se";
+    Add-ADGroupMember $group –Member $user
+    $group = Get-ADGroup "CN=$ShadowGroup,OU=Roles,OU=Groups,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se";
+    Add-ADGroupMember $group –Member $user
 }
