@@ -10,7 +10,7 @@ Set-StrictMode -Version Latest
 
 Import-Module ActiveDirectory
 
-$Users = Import-Csv -Delimiter "," -Path "C:\Users\Administrator\Documents\GitHub\powershell\users.csv"           
+$Users = Import-Csv -Delimiter "," -Path "C:\Users\Administrator\Documents\GitHub\powershell\users-test.csv"           
 
 foreach ($User in $Users)            
 {            
@@ -45,9 +45,10 @@ foreach ($User in $Users)
     
     echo "UserName: $SAM`r`nPassword: $Password`r`n" | Out-File "C:\Users\Administrator\Documents\GitHub\powershell\$SAM.txt"
 
+    $ShadowGroup = 'SG_' + $Department
+
     If(-Not (Get-ADOrganizationalUnit -SearchBase 'OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -Filter 'name -like $Department')){
         New-ADOrganizationalUnit -Name $Department -Path 'OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se'
-        $ShadowGroup = 'SG_' + $Department
         New-ADGroup -Name $ShadowGroup -Path 'OU=Roles,OU=Groups,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -GroupCategory Security -GroupScope Global
     }
     
