@@ -1,9 +1,9 @@
 ﻿################## METADATA ##################
-# NAME: your full name
-# USERNAME: your login name
-# COURSE: this course’s name
-# ASSIGNMENT: name and number of assignment
-# DATE OF LAST CHANGE: date in ISO~8601
+# NAME: Johan Olsson
+# USERNAME: d15johol
+# COURSE: IT341G
+# ASSIGNMENT: Powershell 4.1
+# DATE OF LAST CHANGE: 2016-03-14
 ##############################################
 
 Set-StrictMode -Version Latest
