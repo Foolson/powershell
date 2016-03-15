@@ -10,21 +10,23 @@ Set-StrictMode -Version Latest
 
 Import-Module ActiveDirectory
 
-ForEach($OU in (Get-ADOrganizationalUnit -SearchBase 'OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -Filter *)){
-    $OUName = $OU.Name    $GroupName = "SG_" + $OUName
-    ForEach($ShadowGroup in (Get-ADGroup -SearchBase 'OU=Roles,OU=Groups,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -Filter 'name -like $GroupName')){
-        ForEach($User in (Get-ADGroupMember $ShadowGroup)){
+ForEach($OU In (Get-ADOrganizationalUnit -SearchBase 'OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -Filter *)){
+    $OUSG = "SG_" + $OU.Name
+    $ShadowGroup = (Get-ADGroup -Filter {Name -Like $OUSG})
+    If($ShadowGroup -ne $null){
+        $ShadowGroupName = $ShadowGroup.Name
+        ForEach($User In (Get-ADGroupMember $ShadowGroup)){
             $UserName = $User.Name
-             If(-Not(Get-ADUser -SearchBase "OU=$OUName,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se" -Filter 'Name -like $UserName')){
+             If(-Not(Get-ADUser -SearchBase $OU.DistinguishedName -Filter {Name -Like $UserName})){
                 Remove-ADGroupMember $ShadowGroup -Member $User -Confirm:$false
+                Echo "$UserName Removed from $ShadowGroupName"
              }
         }
-        ForEach($User in (Get-ADUser -SearchBase "OU=$OUName,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se" -Filter *)){
+        ForEach($User In (Get-ADUser -SearchBase $OU.DistinguishedName -Filter *)){
             $UserName = $User.Name
-            If(-Not(Get-ADUser -SearchBase $ShadowGroup.DistinguishedName -Filter 'Name -like $UserName')){
-                $ShadowGroupName =$ShadowGroup.Name
-                Add-ADGroupMember $ShadowGroup -Member $User 
+            If(-Not(Get-ADGroupMember -Identity $ShadowGroup | Where {$_.Name -eq $UserName})){
+               Add-ADGroupMember $ShadowGroup -Member $User
+               Echo "$UserName Added to $ShadowGroupName"
             }
-        }
-    }
+        }    }
 }
