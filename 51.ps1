@@ -2,8 +2,8 @@
 # NAME: Johan Olsson
 # USERNAME: d15johol
 # COURSE: IT341G
-# ASSIGNMENT: Powershell 4.2
-# DATE OF LAST CHANGE: 2016-03-14
+# ASSIGNMENT: Powershell 5.1
+# DATE OF LAST CHANGE: 2016-03-15
 ##############################################
 
 Set-StrictMode -Version Latest
