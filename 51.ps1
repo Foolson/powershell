@@ -12,11 +12,23 @@ $Year = Get-Date -Format yyyy
 $Month = Get-Date -Format MM
 $Day = Get-Date -Format dd
 $Weekday =  Get-Date -UFormat %u
+$Hostname = Hostname
+
+If($Weekday -Like 0){
+    Move-Item -Path \\DC01\Backup\$Year\$Month\$Weekday -Destination \\DC01\Backup\$Year\$Month\$Hostname-$Year-$Month-$Day
+}
 
 New-Item -ItemType Directory -Force -Path \\DC01\Backup\$Year\$Month\$Weekday
 
-If(-Not($Weekday -Like "7")){
-    $Policy = New-WBPolicy
-    $BackupTarget = New-WBBackupTarget -NetworkPath \\DC01\Backup\$Year\$Month\$Weekday
-    #Add-WBBackupTarget -Policy $Policy -Target $BackupTarget
+$Policy = New-WBPolicy
+$BackupTarget = New-WBBackupTarget -NetworkPath \\DC01\Backup\$Year\$Month\$Weekday
+Add-WBBackupTarget -Policy $Policy -Target $BackupTarget
+$FileSpec = New-WBFileSpec -FileSpec "C:\Windows\SYSVOL"
+Add-WBFileSpec -Policy $Policy -FileSpec $FileSpec
+Start-WBBackup -Policy $Policy
+
+If(-Not(Get-EventLog -List | Where {$_.Source -Like "BackupScript"})){
+    New-EventLog -LogName Application -Source BackupScript     
 }
+
+Write-EventLog -EventId 666 -LogName Application -Message "Backup complete!" -Source BackupScript
