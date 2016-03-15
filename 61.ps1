@@ -5,6 +5,7 @@
 # ASSIGNMENT: Powershell 6.1
 # DATE OF LAST CHANGE: 2016-03-15
 ##############################################
+
 Set-StrictMode -Version Latest
 
 $File = Read-Host "Full Path To File"
