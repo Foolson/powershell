@@ -10,26 +10,38 @@ Set-StrictMode -Version Latest
 
 Import-Module ActiveDirectory
 
-$Users = Import-Csv -Delimiter "," -Path "C:\Users\Administrator\Documents\GitHub\powershell\users-test.csv"           
+Try{
+    $File = $args[0]
+}
+Catch{
+    $File = Read-Host "Full Path To File"
+}
+
+$Users = Import-Csv -Delimiter "," -Path $File          
 
 foreach ($User in $Users)            
 {            
     $Firstname = $User.Firstname
     $Lastname = $User.Lastname
-
-    $Year = Get-Date -Format yy
     
     $prefix = 96
-    While(1){
+    While($true){
         $prefix++
-        $SAM = [char]$prefix + "$year" + $Firstname.Substring(0,2).ToLower() + $Lastname.Substring(0,2).ToLower()
+        $SAM = [char]$prefix + "-" + $Firstname.Substring(0,2).ToLower() + $Lastname.Substring(0,2).ToLower().Replace("å","a").Replace("ä","a").Replace("ö","o")
         If(-Not (Get-ADUser -Filter 'SamAccountName -like $SAM')){
             break
         }
     }
 
     $Email = $SAM + "@scripting.nsa.his.se"
-    $Password = ([char[]](Get-Random -Input $(33..126) -Count 15)) -join ""    $Seperator = " "
+    
+    $Assembly = Add-Type -AssemblyName System.Web
+    While($true){
+    $Password = ([System.Web.Security.Membership]::GeneratePassword(8,0))
+    If(-Not($Password -match '[\(\)\{\}\[\]\|\>\<\\\/]')){
+        Break
+    }
+}    $Seperator = " "
     $Displayname = $User.Firstname + " " + $User.Lastname
     
     If(Get-ADUser -Filter 'Name -like $Displayname'){
@@ -46,7 +58,6 @@ foreach ($User in $Users)
     echo "UserName: $SAM`r`nPassword: $Password`r`n" | Out-File "C:\Users\Administrator\Documents\GitHub\powershell\$SAM.txt"
 
     $ShadowGroup = 'SG_' + $Department
-
     If(-Not (Get-ADOrganizationalUnit -SearchBase 'OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -Filter 'name -like $Department')){
         New-ADOrganizationalUnit -Name $Department -Path 'OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se'
         New-ADGroup -Name $ShadowGroup -Path 'OU=Roles,OU=Groups,OU=Accounts,DC=scripting,DC=nsa,DC=his,DC=se' -GroupCategory Security -GroupScope Global
