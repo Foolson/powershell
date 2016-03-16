@@ -36,12 +36,8 @@ foreach ($User in $Users)
     $Email = $SAM + "@scripting.nsa.his.se"
     
     $Assembly = Add-Type -AssemblyName System.Web
-    While($true){
-    $Password = ([System.Web.Security.Membership]::GeneratePassword(8,0))
-    If(-Not($Password -match '[\(\)\{\}\[\]\|\>\<\\\/]')){
-        Break
-    }
-}    $Seperator = " "
+    $Password = ([System.Web.Security.Membership]::GeneratePassword(15,0))
+    $Seperator = " "
     $Displayname = $User.Firstname + " " + $User.Lastname
     
     If(Get-ADUser -Filter 'Name -like $Displayname'){

@@ -27,8 +27,6 @@ $FileSpec = New-WBFileSpec -FileSpec "C:\Windows\SYSVOL"
 Add-WBFileSpec -Policy $Policy -FileSpec $FileSpec
 Start-WBBackup -Policy $Policy
 
-If(-Not(Get-EventLog -List | Where {$_.Source -Like "BackupScript"})){
-    New-EventLog -LogName Application -Source BackupScript     
-}
+New-EventLog -LogName Application -Source BackupScript -ErrorAction SilentlyContinue
 
 Write-EventLog -EventId 666 -LogName Application -Message "Backup complete!" -Source BackupScript
