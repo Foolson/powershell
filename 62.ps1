@@ -3,15 +3,18 @@
 # USERNAME: d15johol
 # COURSE: IT341G
 # ASSIGNMENT: Powershell 6.2
-# DATE OF LAST CHANGE: 2016-03-15
+# DATE OF LAST CHANGE: 2016-04-03
 ##############################################
 
 Set-StrictMode -Version Latest
 
+# Get the current user
 $User = [System.Environment]::UserName
 
+# Check how muuch is stored in users home folder
 $StoredSum = [math]::Round(((Get-ChildItem "C:\Users\$User" -Recurse -Force -ErrorAction SilentlyContinue | Measure-Object -property length -sum | Select-Object -ExpandProperty Sum) / 1MB))
 
+# Print tha ammount of stored data on screen
 Echo "Stored Sum: $StoredSum MB"
 # SIG # Begin signature block
 # MIII0AYJKoZIhvcNAQcCoIIIwTCCCL0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
