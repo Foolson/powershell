@@ -37,15 +37,15 @@ ForEach($Computer In (Get-ADComputer -Filter *).Name){
             $TotalFreeStorage += $Drive
         }
 
-        # Add the relevant system information to a object
+        # Add the relevant system information to object
         $object | Add-Member -Name 'Host' -MemberType Noteproperty -Value $Computer
         $object | Add-Member -Name 'OS' -MemberType Noteproperty -Value $OS
         $object | Add-Member -Name 'OS Version' -MemberType Noteproperty -Value $OSVersion
         $object | Add-Member -Name 'Latest Update' -MemberType Noteproperty -Value $Update
         $object | Add-Member -Name 'Storage (GiB)' -MemberType Noteproperty -Value ([math]::Round($TotalStorage / 1073741824))
-        $object | Add-Member -Name 'Free Storage (GiB)' -MemberType Noteproperty -Value ([math]::Round($TotalFreeStorage / 1073741824))        # Add the object to an array        $array += $object
+        $object | Add-Member -Name 'Free Storage (GiB)' -MemberType Noteproperty -Value ([math]::Round($TotalFreeStorage / 1073741824))        # Add object to array        $array += $object
     }
 }
 
-# Output the array with objects in as an table to the file
+# Output the array with objects as a fancy formated table to the file
 $array | Format-Table -Auto >> $File
